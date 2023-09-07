@@ -1,0 +1,361 @@
+---
+title: "Project - Part II"
+student: Kaimi Huang (kh2908)
+objective of research: the objective of the research is to identify factors that relate to high systolic and diastolic blood pressures
+output: html_document
+---
+
+```{r}
+#title: "Project - Part II"
+#student: Kaimi Huang (kh2908)
+#objective of research: the objective of the research is to identify factors that relate to high systolic and diastolic blood pressures
+
+library(magrittr)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+#comparison of (two) means t-test
+
+#the first t-test compares the genders' blood pressure averages to see whether there is a significant difference
+#load the gender data frame
+
+gender <- read.csv("/Users/kaimihuang/Documents/Study/STATUN2102_001_2022_1 - Applied Statistical Computing/Project/gender.csv")
+dim(gender)
+head(gender)
+names(gender)
+
+#for assumption, check that the sample size is greater than 40 for both genders
+table(gender$gender_description)
+
+#calculate the means and standard deviations of systolic blood pressure by gender
+sum_stat_sys_by_gender <- gender %>%
+       select(Systolic, gender_description) %>%
+       
+       #group by gender_description
+       group_by(gender_description) %>%
+    
+       #calculate the means and sds
+       summarize(mean_sys = mean(Systolic, na.rm=TRUE), sd_sys = sd(Systolic, na.rm=TRUE))
+
+print(sum_stat_sys_by_gender)
+
+#calculate the means and standard deviations of diastolic blood pressure by gender
+sum_stat_dia_by_gender <- gender %>%
+       select(Diastolic, gender_description) %>%
+       
+       #group by gender_description
+       group_by(gender_description) %>%
+    
+       #calculate the means and sds
+       summarize(mean_dia = mean(Diastolic, na.rm=TRUE), sd_dia = sd(Diastolic, na.rm=TRUE))
+
+print(sum_stat_dia_by_gender)
+
+#create a comparative boxplot of median systolic blood pressure by gender
+ggplot(gender, aes(Systolic, gender_description)) + geom_boxplot(colour = "blue", fill="light blue", outlier.colour="black", outlier.shape=16, outlier.size=2) + ggtitle("Systolic Blood Pressure by Gender")
+
+#create a comparative boxplot of median diastolic blood pressure by gender
+ggplot(gender, aes(Diastolic, gender_description)) + geom_boxplot(colour = "blue", fill="light blue", outlier.colour="black", outlier.shape=16, outlier.size=2) + ggtitle("Diastolic Blood Pressure by Gender")
+
+#conduct a comparison of means test for systolic blood pressure
+t.test(Systolic~gender_description, data=gender, equal.var=FALSE)
+
+#conduct a comparison of means test for diastolic blood pressure
+t.test(Diastolic~gender_description, data=gender, equal.var=FALSE)
+```
+
+```{r}
+#comparison of (two) means t-test
+
+#the second t-test compares the blood pressure averages of those who have health insurance and of those who do not to see whether there is a significant difference
+
+#load the insurance data frame
+health_insurance <- read.csv("/Users/kaimihuang/Documents/Study/STATUN2102_001_2022_1 - Applied Statistical Computing/Project/health_insurance.csv")
+dim(health_insurance)
+head(health_insurance)
+names(health_insurance)
+
+#for assumption, check that the sample size is greater than 40 for both yes and no groups (answer to the question of whether one is covered by insurance)
+table(health_insurance$coverd_by_health_insurance)
+
+#calculate the means and standard deviations of systolic blood pressure by coverd_by_health_insurance (yes/no)
+sum_stat_sys_by_insurance <- health_insurance %>%
+       select(Systolic, coverd_by_health_insurance) %>%
+       
+       #group by coverd_by_health_insurance
+       group_by(coverd_by_health_insurance) %>%
+    
+       #calculate the means and sds
+       summarize(mean_sys = mean(Systolic, na.rm=TRUE), sd_sys = sd(Systolic, na.rm=TRUE))
+
+print(sum_stat_sys_by_insurance)
+
+#calculate the means and standard deviations of diastolic blood pressure by coverd_by_health_insurance (yes/no)
+sum_stat_dia_by_insurance <- health_insurance %>%
+       select(Diastolic, coverd_by_health_insurance) %>%
+       
+       #group by coverd_by_health_insurance
+       group_by(coverd_by_health_insurance) %>%
+    
+       #calculate the means and sds
+       summarize(mean_dia = mean(Diastolic, na.rm=TRUE), sd_dia = sd(Diastolic, na.rm=TRUE))
+
+print(sum_stat_dia_by_insurance)
+
+#create a comparative boxplot of median systolic blood pressure by coverd_by_health_insurance
+ggplot(health_insurance, aes(Systolic, coverd_by_health_insurance)) + geom_boxplot(colour = "blue", fill="light blue", outlier.colour="black", outlier.shape=16, outlier.size=2) + ggtitle("Systolic Blood Pressure by Insurance")
+
+#create a comparative boxplot of median diastolic blood pressure by coverd_by_health_insurance
+ggplot(health_insurance, aes(Diastolic, coverd_by_health_insurance)) + geom_boxplot(colour = "blue", fill="light blue", outlier.colour="black", outlier.shape=16, outlier.size=2) + ggtitle("Diastolic Blood Pressure by Insurance")
+
+#conduct a comparison of means test for systolic blood pressure
+t.test(Systolic~coverd_by_health_insurance, data=health_insurance, equal.var=FALSE)
+
+#conduct a comparison of means test for diastolic blood pressure
+t.test(Diastolic~coverd_by_health_insurance, data=health_insurance, equal.var=FALSE)
+```
+```{r}
+#chi-square test
+
+#the first chi-square test compares blood pressure level proportions by race to see if there is an association between high blood pressure and race
+
+#load the race data frame
+race <- read.csv("/Users/kaimihuang/Documents/Study/STATUN2102_001_2022_1 - Applied Statistical Computing/Project/race.csv")
+dim(race)
+head(race)
+names(race)
+
+#get rid of the NA values
+race <- na.omit(race)
+
+#create tables that are by race and by blood pressure levels 
+table_sys <- table(race$sys_blood_pressure_level, race$race_description) 
+print(table_sys)
+table_dia <- table(race$dia_blood_pressure_level, race$race_description) 
+print(table_dia)
+
+#create bar charts to compare proportions
+ggplot(race) + geom_bar(mapping = aes(x=race_description, fill = sys_blood_pressure_level), width=0.95, alpha=0.80) + labs(x="race")
+ggplot(race) + geom_bar(mapping = aes(x=race_description, fill = dia_blood_pressure_level), width=0.95, alpha=0.80) + labs(x="race")
+
+#conduct chi-square tests of independence fo systolic blood pressure levels
+chisq.test(race$sys_blood_pressure_level, race$race_description)
+
+#store the test to create a table of the expected counts
+Xsq_sys <- chisq.test(race$sys_blood_pressure_level, race$race_description)
+Xsq_sys$expected
+
+#conduct chi-square tests of independence fo diastolic blood pressure levels
+chisq.test(race$dia_blood_pressure_level, race$race_description)
+
+#store the test to create a table of the expected counts
+Xsq_dia <-chisq.test(race$dia_blood_pressure_level, race$race_description)
+Xsq_dia$expected
+```
+```{r}
+#chi-square test
+
+#the second chi-square test compares blood pressure level proportions by education level to see if there is an association between high blood pressures and education
+
+#load the education data frame
+education <- read.csv("/Users/kaimihuang/Documents/Study/STATUN2102_001_2022_1 - Applied Statistical Computing/Project/education.csv")
+dim(education)
+head(education)
+names(education)
+
+#get rid of the NA values
+education <- na.omit(education)
+dim(education)
+
+#remove the "Don't Know" and "Refused" columns as there are too few counts in those columns and keeping them may affect the test
+condition_1 <- education$education_level != "Don't Know"
+table(condition_1)
+education <- education[condition_1,]
+
+condition_2 <- education$education_level != "Refused"
+table(condition_2)
+
+education <- education[condition_2,]
+dim(education)
+
+#create tables that are by education level and by blood pressure levels 
+table_sys <- table(education$sys_blood_pressure_level, education$education_level) 
+print(table_sys)
+
+table_dia <- table(education$dia_blood_pressure_level, education$education_level) 
+print(table_dia)
+
+#create bar charts to compare proportions
+ggplot(education) + geom_bar(mapping = aes(x=education_level, fill = sys_blood_pressure_level), width=0.95, alpha=0.80) + labs(x="education")
+ggplot(education) + geom_bar(mapping = aes(x=education_level, fill = dia_blood_pressure_level), width=0.95, alpha=0.80) + labs(x="education")
+
+#conduct chi-square tests of independence for systolic blood pressure levels
+chisq.test(education$sys_blood_pressure_level, education$education_level)
+
+#store the test to create a table of the expected counts
+Xsq_sys <- chisq.test(education$sys_blood_pressure_level, education$education_level)
+Xsq_sys$expected
+
+#conduct chi-square tests of independence for diastolic blood pressure levels
+chisq.test(education$dia_blood_pressure_level, education$education_level)
+
+#store the test to create a table of the expected counts
+Xsq_dia <-chisq.test(education$dia_blood_pressure_level, education$education_level)
+Xsq_dia$expected
+```
+```{r}
+#linear regression analysis
+
+#the first linear regression analysis checks whether there is a linear relationship between blood pressures and income
+
+#load the income data frame
+income <- read.csv("/Users/kaimihuang/Documents/Study/STATUN2102_001_2022_1 - Applied Statistical Computing/Project/income.csv")
+dim(income)
+head(income)
+names(income)
+
+#get rid of the NA values
+income <- na.omit(income)
+
+#plot the variables to create scatter plots
+ggplot(income, aes(poverty_level_index, Systolic)) + geom_point(color = "hotpink", na.rm = TRUE) 
+ggplot(income, aes(poverty_level_index, Diastolic)) + geom_point(color = "aquamarine4", na.rm = TRUE)
+
+#calculate the correlations between systolic, diastolic blood pressures and income
+print(cor(income$poverty_level_index,income$Systolic))
+print(cor(income$poverty_level_index,income$Diastolic))
+
+#create models
+sys_inc_model <- lm(Systolic ~ poverty_level_index, data = income)
+print(sys_inc_model)
+dia_inc_model <- lm(Diastolic ~ poverty_level_index, data = income)
+print(dia_inc_model)
+
+#calculate and plot the residuals
+sys_residuals<-resid(sys_inc_model)
+hist(sys_residuals)
+dia_residuals<-resid(dia_inc_model)
+hist(dia_residuals)
+
+#Normal probability plots of the residuals
+qqnorm(sys_residuals)
+qqnorm(dia_residuals)
+
+#Calculate standard residuals
+sys_standard_residuals <- rstandard(sys_inc_model)
+length(sys_standard_residuals)
+dia_standard_residuals <- rstandard(dia_inc_model)
+length(dia_standard_residuals)
+dim(income)
+
+#plot the standard residuals
+hist(sys_standard_residuals)
+hist(dia_standard_residuals)
+
+#Create standardized residual plots
+plot(fitted(sys_inc_model), sys_standard_residuals)
+plot(fitted(dia_inc_model), dia_standard_residuals)
+
+#Combine regression variables with standard residuals
+
+sys_income_stdres <- cbind(income, sys_standard_residuals)
+dim(sys_income_stdres)
+dia_income_stdres <- cbind(income, dia_standard_residuals)
+dim(dia_income_stdres)
+
+#Remove absolute values of standard residuals that are greater than 2.
+sys_income_analysis <- sys_income_stdres[abs(sys_income_stdres$sys_standard_residuals) < 2,]
+dim(sys_income_analysis)
+dia_income_analysis <- dia_income_stdres[abs(dia_income_stdres$dia_standard_residuals) < 2,]
+dim(dia_income_analysis)
+
+#histogram of the standard residuals after removing outliers
+hist(sys_income_analysis$sys_standard_residuals)
+hist(dia_income_analysis$dia_standard_residuals)
+
+#fit the least squares (regression) line to the scatter plots that are without outliers
+ggplot(sys_income_analysis, aes(poverty_level_index, Systolic)) + geom_point(color = "hotpink", na.rm = TRUE) + geom_smooth(method="lm")
+ggplot(dia_income_analysis, aes(poverty_level_index, Diastolic)) + geom_point(color = "aquamarine4", na.rm = TRUE) + geom_smooth(method="lm")
+
+#perform linear regression analyses
+summary(lm(Systolic ~ poverty_level_index, data = sys_income_analysis))
+summary(lm(Diastolic ~ poverty_level_index, data = dia_income_analysis))
+```
+```{r}
+#the next linear regression analysis checks whether there is a linear relationship between blood pressures and sleep
+
+#load the sleep data frame
+sleep <- read.csv("/Users/kaimihuang/Documents/Study/STATUN2102_001_2022_1 - Applied Statistical Computing/Project/sleep.csv")
+dim(sleep)
+head(sleep)
+names(sleep)
+
+#get rid of the NA values
+sleep <- na.omit(sleep)
+
+#plot the variables to create scatter plots
+ggplot(sleep, aes(workday_sleep_hrs, Systolic)) + geom_point(color = "hotpink", na.rm = TRUE) 
+ggplot(sleep, aes(workday_sleep_hrs, Diastolic)) + geom_point(color = "aquamarine4", na.rm = TRUE)
+
+#calculate the correlations between systolic, diastolic blood pressures and sleep
+print(cor(sleep$workday_sleep_hrs,sleep$Systolic))
+print(cor(sleep$workday_sleep_hrs,sleep$Diastolic))
+
+#create models
+sys_sleep_model <- lm(Systolic ~ workday_sleep_hrs, data = sleep)
+print(sys_sleep_model)
+dia_sleep_model <- lm(Diastolic ~ workday_sleep_hrs, data = sleep)
+print(dia_sleep_model)
+
+#calculate and plot the residuals
+sys_residuals<-resid(sys_sleep_model)
+hist(sys_residuals)
+dia_residuals<-resid(dia_sleep_model)
+hist(dia_residuals)
+
+#Normal probability plots of the residuals
+qqnorm(sys_residuals)
+qqnorm(dia_residuals)
+
+#Calculate standard residuals
+sys_standard_residuals <- rstandard(sys_sleep_model)
+length(sys_standard_residuals)
+dia_standard_residuals <- rstandard(dia_sleep_model)
+length(dia_standard_residuals)
+dim(sleep)
+
+#plot the standard residuals
+hist(sys_standard_residuals)
+hist(dia_standard_residuals)
+
+#Create standardized residual plots
+plot(fitted(sys_sleep_model), sys_standard_residuals)
+plot(fitted(dia_sleep_model), dia_standard_residuals)
+
+#Combine regression variables with standard residuals
+sys_sleep_stdres <- cbind(sleep, sys_standard_residuals)
+dim(sys_sleep_stdres)
+dia_sleep_stdres <- cbind(sleep, dia_standard_residuals)
+dim(dia_sleep_stdres)
+
+#Remove absolute values of standard residuals that are greater than 2.
+sys_sleep_analysis <- sys_sleep_stdres[abs(sys_sleep_stdres$sys_standard_residuals) < 2,]
+dim(sys_sleep_analysis)
+dia_sleep_analysis <- dia_sleep_stdres[abs(dia_sleep_stdres$dia_standard_residuals) < 2,]
+dim(dia_sleep_analysis)
+
+#histogram of the standard residuals after removing outliers
+hist(sys_sleep_analysis$sys_standard_residuals)
+hist(dia_sleep_analysis$dia_standard_residuals)
+
+#fit the least squares (regression) line to the scatter plots that are without outliers
+ggplot(sys_sleep_analysis, aes(workday_sleep_hrs, Systolic)) + geom_point(color = "hotpink", na.rm = TRUE) + geom_smooth(method="lm")
+ggplot(dia_sleep_analysis, aes(workday_sleep_hrs, Diastolic)) + geom_point(color = "aquamarine4", na.rm = TRUE) + geom_smooth(method="lm")
+
+#perform linear regression analyses
+summary(lm(Systolic ~ workday_sleep_hrs, data = sys_sleep_analysis))
+summary(lm(Diastolic ~ workday_sleep_hrs, data = dia_sleep_analysis))
+
+```
+
